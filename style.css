@@ -1,0 +1,332 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI',sans-serif;
+    height:100vh;
+    background:#f4f4f4;
+}
+
+.container{
+    display:flex;
+    height:100vh;
+}
+
+.left-panel{
+    width:55%;
+
+    background:
+    linear-gradient(rgba(106,13,37,0.8),
+    rgba(164,0,0,0.8)),
+
+    url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');
+
+    background-size:cover;
+    background-position:center;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.contenido{
+    text-align:center;
+    color:white;
+}
+
+.contenido img{
+    width:420px;
+    margin-bottom:20px;
+    border-radius:15px;
+}
+
+.contenido h1{
+    font-size:60px;
+    margin-bottom:10px;
+}
+
+.contenido p{
+    font-size:22px;
+}
+
+.right-panel{
+    width:45%;
+    background:white;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.login-box,
+.register-box,
+.recover-box{
+    width:420px;
+}
+
+h2{
+    text-align:center;
+    margin-bottom:35px;
+    color:#6A0D25;
+    font-size:40px;
+}
+
+.input-group{
+    margin-bottom:20px;
+}
+
+.input-group input,
+.input-group select{
+
+    width:100%;
+    padding:16px;
+
+    border:1px solid #ccc;
+    border-radius:10px;
+
+    font-size:16px;
+}
+
+.remember{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:25px;
+    font-size:14px;
+}
+
+.remember a{
+    color:#6A0D25;
+    text-decoration:none;
+}
+
+button{
+    width:100%;
+    padding:15px;
+
+    border:none;
+    border-radius:10px;
+
+    background:#6A0D25;
+    color:white;
+
+    font-size:17px;
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+button:hover{
+    background:#A40000;
+}
+
+.crear{
+    text-align:center;
+    margin-top:20px;
+}
+
+.crear a{
+    color:#6A0D25;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.oculto{
+    display:none;
+}
+
+.texto{
+    text-align:center;
+    margin-bottom:20px;
+    color:#555;
+}
+
+@media(max-width:900px){
+
+    .left-panel{
+        display:none;
+    }
+
+    .right-panel{
+        width:100%;
+    }
+
+}
+
+    /* DASHBOARD */
+
+.dashboard{
+    display:flex;
+    min-height:100vh;
+}
+
+.sidebar{
+    width:260px;
+    background:#6A0D25;
+    color:white;
+    padding:20px;
+}
+
+.logo{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.logo img{
+    width:120px;
+    border-radius:10px;
+}
+
+.logo h2{
+    color:white;
+    margin-top:10px;
+}
+
+.sidebar ul{
+    list-style:none;
+}
+
+.sidebar ul li{
+    padding:18px;
+    margin-bottom:10px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+}
+
+.sidebar ul li:hover{
+    background:#A40000;
+}
+
+.sidebar i{
+    margin-right:10px;
+}
+
+.main-content{
+    flex:1;
+    background:#f4f4f4;
+    padding:30px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    color:#6A0D25;
+}
+
+.perfil{
+    background:white;
+    padding:10px 20px;
+    border-radius:10px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+
+    margin-bottom:40px;
+}
+
+.card{
+    background:white;
+    padding:30px;
+
+    border-radius:15px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+
+    text-align:center;
+}
+
+.card h3{
+    color:#6A0D25;
+    margin-bottom:15px;
+}
+
+.card p{
+    font-size:35px;
+    font-weight:bold;
+}
+
+.tabla-container{
+    background:white;
+    padding:25px;
+
+    border-radius:15px;
+
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tabla-container h2{
+    margin-bottom:20px;
+    color:#6A0D25;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+table th{
+    background:#6A0D25;
+    color:white;
+    padding:15px;
+}
+
+table td{
+    padding:15px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+@media(max-width:900px){
+
+    .sidebar{
+        width:80px;
+    }
+
+    .sidebar h2,
+    .sidebar li{
+        font-size:12px;
+    }
+
+}
+
+/* FOTO PERFIL */
+
+.perfil-header{
+
+    display:flex;
+    align-items:center;
+    gap:20px;
+    margin-bottom:30px;
+
+}
+
+.foto-perfil{
+
+    width:120px;
+    height:120px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:5px solid #7a0026;
+
+}

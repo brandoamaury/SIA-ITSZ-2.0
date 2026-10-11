@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITSZ Portal Estudiantil</title>
+    <link rel="icon" type="image/png" href="./img/favicon.png">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- PANEL IZQUIERDO -->
+<div class="left-panel">
+    <div class="contenido">
+        <img src="./img/Logo-SIA.png">
+        <h1>Portal Estudiantil</h1>
+        <p>Instituto Tecnológico Superior de Zongolica</p>
+    </div>
+</div>
+
+    <!-- PANEL DERECHO -->
+    <div class="right-panel">
+
+        <!-- LOGIN -->
+        <form class="login-box" id="loginForm">
+            <h2>Iniciar Sesión</h2>
+
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="usuario" placeholder="Número de control" required>
+            </div>
+
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="password" placeholder="Contraseña" required>
+            </div>
+
+            <div class="remember">
+                <div>
+                    <input type="checkbox" id="recordar">
+                    <label for="recordar">Recordar sesión</label>
+                </div>
+                <a href="#" id="mostrarRecuperar">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button type="submit">Entrar</button>
+
+            <div class="crear">
+                ¿No tienes cuenta?
+                <a href="#" id="mostrarRegistro">Crear usuario</a>
+            </div>
+        </form>
+
+        <!-- REGISTRO -->
+        <form class="register-box oculto" id="registerForm" enctype="multipart/form-data">
+            <h2>Crear Cuenta</h2>
+
+            <div class="input-group">
+                <input type="text" id="nombre" placeholder="Nombre completo" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="matriculaRegistro" placeholder="Matrícula" required>
+            </div>
+
+            <div class="input-group">
+                <input type="email" id="correo" placeholder="Correo institucional" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="semestre" placeholder="Semestre (Número ex. 7)" required>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="salon" placeholder="Salón" required>
+            </div>
+
+            <div class="input-group">
+                <select id="modalidad" required>
+                    <option value="">Selecciona modalidad</option>
+                    <option value="Escolarizado">Escolarizado</option>
+                    <option value="Mixto">Mixto</option>
+                    <option value="Virtual">Virtual</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <input type="password" id="passwordRegistro" placeholder="Crear contraseña" required>
+            </div>
+
+            <!-- NUEVO CAMPO PARA FOTO DE PERFIL -->
+            <div class="input-group" style="display: flex; flex-direction: column; align-items: flex-start; gap: 5px;">
+                <label for="foto" style="font-size: 13px; color: #555; font-weight: bold;">Foto de perfil:</label>
+                <input type="file" id="foto" accept="image/*" style="padding: 5px; font-size: 13px;">
+            </div>
+
+            <button type="submit">Crear Cuenta</button>
+
+            <div class="crear">
+                <a href="#" id="volverLogin">Volver al login</a>
+            </div>
+        </form>
+
+        <!-- RECUPERAR -->
+        <form class="recover-box oculto" id="recoverForm">
+            <h2>Recuperar Contraseña</h2>
+
+            <p class="texto">Ingresa tu correo institucional</p>
+
+            <div class="input-group">
+                <input type="email" placeholder="Correo registrado">
+            </div>
+
+            <button type="submit">Enviar recuperación</button>
+
+            <div class="crear">
+                <a href="#" id="volverLogin2">Volver al login</a>
+            </div>
+        </form>
+
+    </div>
+
+</div>
+
+/* ========================================================================== */
+/* SECCIÓN DE SEGUNDA LENGUA PARA TITULACIÓN                                  */
+/* ========================================================================== */
+
+// Catálogo base de Lenguas
+const LENGUAS_TITULACION = [
+    { id: 'ING', nombre: 'Inglés para Titulación', docente: 'Irais Irene Texcahua Escobar', total_modulos: 5 },
+    { id: 'NAH', nombre: 'Náhuatl para Titulación', docente: 'CLEyM (Irais Irene Texcahua Escobar)', total_modulos: 5 }
+];
+
+/* OBTENER ESTADO DE SEGUNDA LENGUA PARA UN ALUMNO */
+app.get("/lenguas-status/:matricula", async (req, res) => {
+    const matricula = req.params.matricula;
+    try {
+        const resultado = await pool.query(
+            `SELECT * FROM alumno_lenguas WHERE matricula = $1 ORDER BY id ASC`,
+            [matricula]
+        );
+        res.json({
+            catalogo: LENGUAS_TITULACION,
+            inscripciones: resultado.rows
+        });
+    } catch (error) {
+        console.log("ERROR LENGUAS STATUS:", error);
+        res.status(500).json({ catalogo: LENGUAS_TITULACION, inscripciones: [] });
+    }
+});
+
+/* INSCRIBIRSE A UN MÓDULO DE LENGUA */
+app.post("/inscribir-lengua", async (req, res) => {
+    const { matricula, lengua_codigo, modulo } = req.body;
+    try {
+        // Verificar si ya está en proceso o acreditado ese módulo
+        const existe = await pool.query(
+            "SELECT * FROM alumno_lenguas WHERE matricula = $1 AND lengua_codigo = $2 AND modulo = $3",
+            [matricula, lengua_codigo, modulo]
+        );
+
+        if (existe.rows.length > 0) {
+            return res.json({ success: false, mensaje: `Ya estás registrado en el Módulo ${modulo}.` });
+        }
+
+        await pool.query(
+            "INSERT INTO alumno_lenguas (matricula, lengua_codigo, modulo, estado) VALUES ($1, $2, $3, 'En proceso')",
+            [matricula, lengua_codigo, parseInt(modulo)]
+        );
+
+        res.json({ success: true, mensaje: `✅ Inscrito correctamente al Módulo ${modulo} de ${lengua_codigo === 'ING' ? 'Inglés' : 'Náhuatl'}.` });
+    } catch (error) {
+        console.log("ERROR INSCRIBIR LENGUA:", error);
+        res.status(500).json({ success: false, mensaje: "Error al inscribir el módulo de lengua." });
+    }
+});
+
+/* ACREDITAR MÓDULO DE LENGUA (CLAVE: ESCOBAR2026) */
+app.put("/acreditar-lengua", async (req, res) => {
+    const { alumno_lengua_id, clave_profesor } = req.body;
+
+    try {
+        if (String(clave_profesor).trim() !== "ESCOBAR2026") {
+            return res.json({ 
+                success: false, 
+                mensaje: "❌ Clave de docente incorrecta. Se requiere autorización de Irais Irene Texcahua Escobar / CLEyM." 
+            });
+        }
+
+        await pool.query(
+            "UPDATE alumno_lenguas SET estado = 'Acreditada' WHERE id = $1",
+            [alumno_lengua_id]
+        );
+
+        res.json({ success: true, mensaje: "🎉 ¡Módulo de Lengua Acreditado exitosamente!" });
+    } catch (error) {
+        console.log("ERROR ACREDITAR LENGUA:", error);
+        res.status(500).json({ success: false, mensaje: "Error al acreditar el módulo de lengua." });
+    }
+});
+
+/* KARDEX COMPLETO (INCLUYE MATERIAS, ACTIVIDADES Y SEGUNDA LENGUA) */
+app.get("/kardex/:matricula", async (req, res) => {
+    const matricula = req.params.matricula;
+    try {
+        const materiasRes = await pool.query(
+            `SELECT materias.nombre, materias.creditos, calificaciones.final 
+             FROM calificaciones 
+             INNER JOIN materias ON calificaciones.materia_id = materias.id 
+             WHERE calificaciones.matricula = $1`,
+            [matricula]
+        );
+        const materias = materiasRes.rows;
+
+        const actividadesRes = await pool.query(
+            `SELECT catalogo_actividades.nombre, catalogo_actividades.categoria AS tipo, alumno_actividades.estado
+             FROM alumno_actividades
+             INNER JOIN catalogo_actividades ON alumno_actividades.actividad_id = catalogo_actividades.id
+             WHERE alumno_actividades.matricula = $1`,
+            [matricula]
+        );
+        const actividades = actividadesRes.rows;
+
+        const lenguasRes = await pool.query(
+            `SELECT lengua_codigo, modulo, estado FROM alumno_lenguas WHERE matricula = $1 ORDER BY lengua_codigo, modulo ASC`,
+            [matricula]
+        );
+        const lenguas = lenguasRes.rows;
+
+        let suma = 0, creditos = 0;
+        materias.forEach((m) => {
+            suma += parseFloat(m.final || 0);
+            creditos += parseInt(m.creditos || 0);
+        });
+
+        const promedio = materias.length > 0 ? suma / materias.length : 0;
+
+        res.json({ materias, promedio, creditos, actividades, lenguas });
+    } catch (error) {
+        console.log("ERROR KARDEX:", error);
+        res.status(500).json({ materias: [], promedio: 0, creditos: 0, actividades: [], lenguas: [] });
+    }
+});
+
+<!-- CÓDIGO JS CON MANEJO DE REGISTRO FORM-DATA Y LOGIN -->
+<script>
+// Manejo de cambio de vistas
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const recoverForm = document.getElementById('recoverForm');
+
+document.getElementById('mostrarRegistro').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('oculto');
+    registerForm.classList.remove('oculto');
+});
+
+document.getElementById('volverLogin').addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.classList.add('oculto');
+    loginForm.classList.remove('oculto');
+});
+
+document.getElementById('mostrarRecuperar').addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('oculto');
+    recoverForm.classList.remove('oculto');
+});
+
+document.getElementById('volverLogin2').addEventListener('click', (e) => {
+    e.preventDefault();
+    recoverForm.classList.add('oculto');
+    loginForm.classList.remove('oculto');
+});
+
+// Petición LOGIN
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const matricula = document.getElementById('usuario').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const res = await fetch('http://localhost:3000/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matricula, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            localStorage.setItem('alumno', JSON.stringify(data.alumno));
+            window.location.href = 'dashboard.html';
+        } else {
+            alert('Matrícula o contraseña incorrectas');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error al intentar iniciar sesión');
+    }
+});
+
+// Petición REGISTRO MULTIPART (FormData)
+registerForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    formData.append('nombre', document.getElementById('nombre').value);
+    formData.append('matricula', document.getElementById('matriculaRegistro').value);
+    formData.append('correo', document.getElementById('correo').value);
+    formData.append('semestre', document.getElementById('semestre').value);
+    formData.append('salon', document.getElementById('salon').value);
+    formData.append('modalidad', document.getElementById('modalidad').value);
+    formData.append('password', document.getElementById('passwordRegistro').value);
+
+    const fotoInput = document.getElementById('foto');
+    if (fotoInput && fotoInput.files[0]) {
+        formData.append('foto', fotoInput.files[0]);
+    }
+
+    try {
+        const res = await fetch('http://localhost:3000/registro', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            alert('Cuenta creada exitosamente. Ahora puedes iniciar sesión.');
+            registerForm.reset();
+            registerForm.classList.add('oculto');
+            loginForm.classList.remove('oculto');
+        } else {
+            alert('Error al crear la cuenta. Verifica que los datos o la matrícula no existan ya.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Error de servidor al registrar la cuenta');
+    }
+});
+</script>
+
+</body>
+</html>
